@@ -39,16 +39,11 @@ foreach ($sales_files AS $file) {
 }
 
 foreach ($years AS $year) {
-  // Parse pdf file and build necessary objects.
-  //$parser = new \Smalot\PdfParser\Parser();
   $pdf    = $parser->parseFile($year . '.pdf');
-  
-  // Retrieve all pages from the pdf file.
   $pages  = $pdf->getPages();
 
   $id = null;
 
-  // Loop over each page to extract text.
   foreach ($pages as $page) {
     $blob = $page->getText();
     $lines = explode("\n", $blob);
@@ -56,9 +51,7 @@ foreach ($years AS $year) {
     foreach ($lines AS $line) {
       if (strpos($line, '*******************************************************************************************************') === 0) {
         $id = trim(str_replace('*', '', $line));
-        if (!$id) {
-          //print('Could not find id in ' . $line);
-        }
+        if (!$id) //print('Could not find id in ' . $line);
         $cnt = 0;
       }
       else if ($cnt == 1) {
@@ -69,9 +62,7 @@ foreach ($years AS $year) {
       }
       else if ($cnt == 2) {
         $repeat_id = trim(substr($line, 0, 20));
-        if ($repeat_id !== $id) {
-          //print "The second id $repeat_id does not match first id: $id \n";
-        }
+        if ($repeat_id !== $id) //print "The second id $repeat_id does not match first id: $id \n";
         $entries[$id]['code'] = trim(substr($line, 31, 3));
       }
       else if (strpos($line, 'TAXABLE VALUE') !== FALSE && strpos($line, 'CITY') !== FALSE) {
@@ -80,9 +71,6 @@ foreach ($years AS $year) {
       else if (strpos($line, 'FULL MARKET VALUE') > 0) {
         $tmp = explode(" ", str_replace(',', '', trim(substr($line, 50, 23))));
         $entries[$id][$year . 'fullmarket'] = $tmp[0];
-        if ($entries[$id][$year . 'fullmarket'] == '100300   SC') {
-          var_dump($line);die();
-        }
       }
       $cnt++;
     }
