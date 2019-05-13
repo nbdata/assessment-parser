@@ -124,7 +124,7 @@ foreach ($years AS $year) {
 ksort($entries);
 
 $fp = fopen('output.csv', 'w');
-fputcsv($fp, array('ID', 'Street', 'Non-Homestead', 'Account', 'Code', '2016 City', '2016 Full', '2017 City', '2017 Full', '2018 City', '2018 Full', '2019 City', '2019 Full', 'Sale Date', 'Sale Price', 'Sale AV', 'OwnerAtAddress', 'Latitude', 'Longitude', 'TigerLine'));
+fputcsv($fp, array('ID', 'Street', 'Non-Homestead', 'Account', 'Code', '2016 City', '2016 Full', '2017 City', '2017 Full', '2018 City', '2018 Full', '2019 City', '2019 Full', 'Sale Date', 'Sale Price', 'Sale AV', 'OwnerAtAddress', 'Latitude', 'Longitude', 'TigerLine', '20162019Diff', 'SaleAssessDiff'));
 foreach ($entries AS $id => $data) {
   if (!isset($data['2019fullmarket'])) continue;
 
@@ -149,6 +149,8 @@ foreach ($entries AS $id => $data) {
     $data['latitude'],
     $data['longitude'],
     $data['tiger'],
+    (isset($data['2016fullmarket']) && isset($data['2019fullmarket'])) ? (int) $data['2019fullmarket'] - (int) $data['2016fullmarket'] : '',
+    (isset($data['saleprice']) && isset($data['saleassess'])) ? (int) $data['saleprice'] - (int) $data['saleassess'] : '',
   ));
 }
 
