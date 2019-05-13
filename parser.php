@@ -64,6 +64,23 @@ while ($row = fgetcsv($handle, 1000, ',')) {
 } 
 fclose($handle);
 
+// Add in info from geocoding
+$handle = fopen('AA_Parcels.csv', 'r');
+while ($row = fgetcsv($handle, 1000, ',')) {
+  if (count($row) < 10) continue;
+
+  $id = $row[5];
+  $entries[$id]['zoning'] = $row[13];
+  $entries[$id]['sqft'] = $row[24];
+  $entries[$id]['land_size'] = $row[25];
+  $entries[$id]['year_built'] = $row[23];
+  $entries[$id]['bathrooms'] = $row[29];
+  $entries[$id]['bedrooms'] = $row[30];
+  $entries[$id]['ward'] = $row[31];
+  $entries[$id]['census_block'] = $row[33];
+}
+fclose($handle);
+
 foreach ($years AS $year) {
   $pdf    = $parser->parseFile($year . '.pdf');
   $pages  = $pdf->getPages();
@@ -124,7 +141,10 @@ foreach ($years AS $year) {
 ksort($entries);
 
 $fp = fopen('output.csv', 'w');
-fputcsv($fp, array('ID', 'Street', 'Non-Homestead', 'Account', 'Code', '2016 City', '2016 Full', '2017 City', '2017 Full', '2018 City', '2018 Full', '2019 City', '2019 Full', 'Sale Date', 'Sale Price', 'Sale AV', 'OwnerAtAddress', 'Latitude', 'Longitude', 'TigerLine', '20162019Diff', 'SaleAssessDiff'));
+fputcsv($fp, array('ID', 'Street', 'Non-Homestead', 'Account', 'Code', '2016 City', '2016 Full', '2017 City', '2017 Full', '2018 City', '2018 Full', '2019 City', '2019 Full', 'Sale Date', 'Sale Price', 'Sale AV', 
+  'OwnerAtAddress', 'Latitude', 'Longitude', 'TigerLine', '20162019Diff', 'SaleAssessDiff',
+  'SqFt', 'Bathrooms', 'Bedrooms', 'YearBuilt', 'LandSize', 'Zoning', 'Ward', 'CensusBlock'
+));
 foreach ($entries AS $id => $data) {
   if (!isset($data['2019fullmarket'])) continue;
 
@@ -151,6 +171,15 @@ foreach ($entries AS $id => $data) {
     $data['tiger'],
     (isset($data['2016fullmarket']) && isset($data['2019fullmarket'])) ? (int) $data['2019fullmarket'] - (int) $data['2016fullmarket'] : '',
     (isset($data['saleprice']) && isset($data['saleassess'])) ? (int) $data['saleprice'] - (int) $data['saleassess'] : '',
+    $data['sqft'],
+    $data['bathrooms'],
+    $data['bedrooms'],
+    $data['year_built'],
+    $data['land_size'],
+    $data['zoning'],
+    $data['ward'],
+    $data['census_block'],
+
   ));
 }
 
