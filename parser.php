@@ -218,8 +218,8 @@ foreach ($entries AS $id => $data) {
     (!empty($data['2016fullmarket']) && !empty($data['2020fullmarket'])) ? ((int) $data['2020fullmarket'] - (int) $data['2016fullmarket']) / (int) $data['2016fullmarket'] : '',
     (!empty($data['saleprice'])) ? $data['saleprice'] / $data['sqft'] : '',
     $data['nbhd'],
-    $data['2020vacant'],
-    $data['2020violations'],
+    (empty($data['2020vacant']) ? 0 : 1),
+    (empty($data['2020violations']) ? 0 : 1),
   ));
 }
 
