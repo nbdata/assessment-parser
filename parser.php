@@ -170,7 +170,7 @@ fputcsv($fp, array('ID', 'Street', 'Non-Homestead', 'Account', 'Code', '2016 Cit
   '2016OwnerAtAddress', '2017OwnerAtAddress', '2018OwnerAtAddress', '2019OwnerAtAddress', '2020OwnerAtAddress',
   'Latitude', 'Longitude', 'TigerLine', '20162020Diff', 'SaleAssessDiff',
   'SqFt', 'Bathrooms', 'Bedrooms', 'YearBuilt', 'LandSize', 'Zoning', 'Ward', 'CensusBlock',
-  'AVPerSqFt', 'AVChangePercent', 'SalePricePerSqFt', 'NbhdCode', 'Prediction', 'PredictAVDiff'
+  'AVPerSqFt', 'AVChangePercent', 'SalePricePerSqFt', 'NbhdCode', '2020Vacant', '2020Violations'
 ));
 foreach ($entries AS $id => $data) {
   if (empty($data['2020fullmarket'])) continue;
