@@ -2,7 +2,7 @@
 include 'vendor/autoload.php';
 
 $parser = new \Smalot\PdfParser\Parser();
-$years = array('2016', '2017', '2018', '2019');
+$years = array('2016', '2017', '2018', '2019', '2020');
 $entries = array();
 
 // Recent Sales info
@@ -64,6 +64,30 @@ while ($row = fgetcsv($handle, 1000, ',')) {
 } 
 fclose($handle);
 
+// Add in info from nbhd code
+$handle = fopen('neighborhood_codes.csv', 'r');
+while ($row = fgetcsv($handle, 1000, ',')) {
+  $id = str_replace('/', '-', $row[0]);
+
+  if (!isset($entries[$id]['nbhd'])) {
+    $entries[$id]['nbhd'] = (int) $row[1];
+  }
+}
+fclose($handle);
+
+// Add in info from Tolemi exports
+$handle = fopen('vacant/2020.csv', 'r');
+while ($row = fgetcsv($handle, 1000, ',')) {
+  $entries[$row[0]]['2020vacant'] = 1;
+}
+fclose($handle);
+
+$handle = fopen('violations/2020.csv', 'r');
+while ($row = fgetcsv($handle, 1000, ',')) {
+  $entries[$row[0]]['2020violations'] = 1;
+}
+fclose($handle);
+
 // Add in info from geocoding
 $handle = fopen('AA_Parcels.csv', 'r');
 while ($row = fgetcsv($handle, 1000, ',')) {
@@ -122,13 +146,13 @@ foreach ($years AS $year) {
         //print "$first_fifteen::" . $entries[$id]['address'] . "::" . stripos($entries[$id]['address'], $first_fifteen) . "\n";
         //var_dump($line);
         if (stripos($entries[$id]['address'], $first_fifteen) === 0) {
-          $entries[$id]['owneraddress'] = 1;
+          $entries[$id][$year . 'owneraddress'] = 1;
         }
-        else if (!isset($entries[$id]['owneraddress']) && stripos($first_fifteen, 'Newburgh') !== FALSE) {
-          $entries[$id]['owneraddress'] = 2;
+        else if (!isset($entries[$id][$year . 'owneraddress']) && stripos($first_fifteen, 'Newburgh') !== FALSE) {
+          $entries[$id][$year . 'owneraddress'] = 2;
         }
-        else if (!isset($entries[$id]['owneraddress']) && strpos($first_fifteen, ' NY') !== FALSE) {
-          $entries[$id]['owneraddress'] = 3;
+        else if (!isset($entries[$id][$year . 'owneraddress']) && strpos($first_fifteen, ' NY') !== FALSE) {
+          $entries[$id][$year . 'owneraddress'] = 3;
         }
       }
 
@@ -141,12 +165,17 @@ foreach ($years AS $year) {
 ksort($entries);
 
 $fp = fopen('output.csv', 'w');
-fputcsv($fp, array('ID', 'Street', 'Non-Homestead', 'Account', 'Code', '2016 City', '2016 Full', '2017 City', '2017 Full', '2018 City', '2018 Full', '2019 City', '2019 Full', 'Sale Date', 'Sale Price', 'Sale AV', 
-  'OwnerAtAddress', 'Latitude', 'Longitude', 'TigerLine', '20162019Diff', 'SaleAssessDiff',
-  'SqFt', 'Bathrooms', 'Bedrooms', 'YearBuilt', 'LandSize', 'Zoning', 'Ward', 'CensusBlock'
+fputcsv($fp, array('ID', 'Street', 'Non-Homestead', 'Account', 'Code', '2016 City', '2016 Full', '2017 City', '2017 Full', '2018 City', '2018 Full', 
+  '2019 City', '2019 Full', '2020 City', '2020 Full', 'Sale Date', 'Sale Price', 'Sale AV', 
+  '2016OwnerAtAddress', '2017OwnerAtAddress', '2018OwnerAtAddress', '2019OwnerAtAddress', '2020OwnerAtAddress',
+  'Latitude', 'Longitude', 'TigerLine', '20162020Diff', 'SaleAssessDiff',
+  'SqFt', 'Bathrooms', 'Bedrooms', 'YearBuilt', 'LandSize', 'Zoning', 'Ward', 'CensusBlock',
+  'AVPerSqFt', 'AVChangePercent', 'SalePricePerSqFt', 'NbhdCode', 'Prediction', 'PredictAVDiff'
 ));
 foreach ($entries AS $id => $data) {
-  if (!isset($data['2019fullmarket'])) continue;
+  if (empty($data['2020fullmarket'])) continue;
+  #if (!isset($data['latitude'])) continue;
+  #if (!isset($data['sqft'])) continue;
 
   fputcsv($fp, array(
     $id, 
@@ -162,14 +191,20 @@ foreach ($entries AS $id => $data) {
     $data['2018fullmarket'],
     $data['2019taxvalue'],
     $data['2019fullmarket'],
+    $data['2020taxvalue'],
+    $data['2020fullmarket'],
     $data['saledate'],
     $data['saleprice'],
     $data['saleassess'],
-    isset($data['owneraddress']) ? $data['owneraddress'] : 0, 
+    isset($data['2016owneraddress']) ? $data['2016owneraddress'] : 0,
+    isset($data['2017owneraddress']) ? $data['2017owneraddress'] : 0, 
+    isset($data['2018owneraddress']) ? $data['2018owneraddress'] : 0, 
+    isset($data['2019owneraddress']) ? $data['2019owneraddress'] : 0, 
+    isset($data['2020owneraddress']) ? $data['2020owneraddress'] : 0, 
     $data['latitude'],
     $data['longitude'],
     $data['tiger'],
-    (isset($data['2016fullmarket']) && isset($data['2019fullmarket'])) ? (int) $data['2019fullmarket'] - (int) $data['2016fullmarket'] : '',
+    (isset($data['2016fullmarket']) && isset($data['2020fullmarket'])) ? (int) $data['2020fullmarket'] - (int) $data['2016fullmarket'] : '',
     (isset($data['saleprice']) && isset($data['saleassess'])) ? (int) $data['saleprice'] - (int) $data['saleassess'] : '',
     $data['sqft'],
     $data['bathrooms'],
@@ -179,7 +214,12 @@ foreach ($entries AS $id => $data) {
     $data['zoning'],
     $data['ward'],
     $data['census_block'],
-
+    (!empty($data['sqft']) && !empty($data['2020fullmarket'])) ? (int) $data['2020fullmarket'] / (int) $data['sqft'] : '',
+    (!empty($data['2016fullmarket']) && !empty($data['2020fullmarket'])) ? ((int) $data['2020fullmarket'] - (int) $data['2016fullmarket']) / (int) $data['2016fullmarket'] : '',
+    (!empty($data['saleprice'])) ? $data['saleprice'] / $data['sqft'] : '',
+    $data['nbhd'],
+    $data['2020vacant'],
+    $data['2020violations'],
   ));
 }
 
