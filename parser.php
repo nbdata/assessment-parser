@@ -88,6 +88,12 @@ while ($row = fgetcsv($handle, 1000, ',')) {
 }
 fclose($handle);
 
+$handle = fopen('oz.csv', 'r');
+while ($row = fgetcsv($handle, 1000, ',')) {
+  $entries[$row[0]]['oz'] = 1;
+}
+fclose($handle);
+
 // Add in info from geocoding
 $handle = fopen('AA_Parcels.csv', 'r');
 while ($row = fgetcsv($handle, 1000, ',')) {
@@ -170,7 +176,7 @@ fputcsv($fp, array('ID', 'Street', 'Non-Homestead', 'Account', 'Code', '2016 Cit
   '2016OwnerAtAddress', '2017OwnerAtAddress', '2018OwnerAtAddress', '2019OwnerAtAddress', '2020OwnerAtAddress',
   'Latitude', 'Longitude', 'TigerLine', '20162020Diff', 'SaleAssessDiff',
   'SqFt', 'Bathrooms', 'Bedrooms', 'YearBuilt', 'LandSize', 'Zoning', 'Ward', 'CensusBlock',
-  'AVPerSqFt', 'AVChangePercent', 'SalePricePerSqFt', 'NbhdCode', '2020Vacant', '2020Violations'
+  'AVPerSqFt', 'AVChangePercent', 'SalePricePerSqFt', 'NbhdCode', '2020Vacant', '2020Violations', 'OpportunityZone',
 ));
 foreach ($entries AS $id => $data) {
   if (empty($data['2020fullmarket'])) continue;
@@ -220,8 +226,24 @@ foreach ($entries AS $id => $data) {
     $data['nbhd'],
     (empty($data['2020vacant']) ? 0 : 1),
     (empty($data['2020violations']) ? 0 : 1),
+    (empty($data['oz']) ? 0 : 1),
   ));
 }
+
+$handle = fopen('predict.csv', 'r');
+while ($row = fgetcsv($handle, 1000, ',')) {
+  $id = trim($row[0]);
+  $p = (int) $row[1];
+  if ($p > 100000 && $p < 650000 && !empty($entries[$id]['2020fullmarket']) && !empty($entries[$id]['2020taxvalue']) && $entries[$id]['code'] == '210' ) {
+    $diff[$id] = ($p - (int) $entries[$id]['2020fullmarket']) / $entries[$id]['2020fullmarket'];
+  }
+}
+fclose($handle);
+
+asort($diff);
+var_dump($diff);
+$average_of_foo = array_sum($diff) / count($diff);
+var_dump($average_of_foo);die();
 
 function clean($str) {
   $tmp = trim($str);
