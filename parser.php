@@ -2,7 +2,7 @@
 include 'vendor/autoload.php';
 
 $parser = new \Smalot\PdfParser\Parser();
-$years = array('2016', '2017', '2018', '2019', '2020');
+$years = array('2016', '2017', '2018', '2019', '2020', '2021');
 $entries = array();
 
 // Recent Sales info
@@ -172,7 +172,7 @@ ksort($entries);
 
 $fp = fopen('output.csv', 'w');
 fputcsv($fp, array('ID', 'Street', 'Non-Homestead', 'Account', 'Code', '2016 City', '2016 Full', '2017 City', '2017 Full', '2018 City', '2018 Full', 
-  '2019 City', '2019 Full', '2020 City', '2020 Full', 'Sale Date', 'Sale Price', 'Sale AV', 
+  '2019 City', '2019 Full', '2020 City', '2020 Full', '2021 City', '2021 Full', 'Sale Date', 'Sale Price', 'Sale AV', 
   '2016OwnerAtAddress', '2017OwnerAtAddress', '2018OwnerAtAddress', '2019OwnerAtAddress', '2020OwnerAtAddress',
   'Latitude', 'Longitude', 'TigerLine', '20162020Diff', 'SaleAssessDiff',
   'SqFt', 'Bathrooms', 'Bedrooms', 'YearBuilt', 'LandSize', 'Zoning', 'Ward', 'CensusBlock',
@@ -199,6 +199,8 @@ foreach ($entries AS $id => $data) {
     $data['2019fullmarket'],
     $data['2020taxvalue'],
     $data['2020fullmarket'],
+    $data['2021taxvalue'],
+    $data['2021fullmarket'],
     $data['saledate'],
     $data['saleprice'],
     $data['saleassess'],
@@ -207,10 +209,11 @@ foreach ($entries AS $id => $data) {
     isset($data['2018owneraddress']) ? $data['2018owneraddress'] : 0, 
     isset($data['2019owneraddress']) ? $data['2019owneraddress'] : 0, 
     isset($data['2020owneraddress']) ? $data['2020owneraddress'] : 0, 
+    isset($data['2021owneraddress']) ? $data['2021owneraddress'] : 0, 
     $data['latitude'],
     $data['longitude'],
     $data['tiger'],
-    (isset($data['2016fullmarket']) && isset($data['2020fullmarket'])) ? (int) $data['2020fullmarket'] - (int) $data['2016fullmarket'] : '',
+    (isset($data['2016fullmarket']) && isset($data['2021fullmarket'])) ? (int) $data['2021fullmarket'] - (int) $data['2016fullmarket'] : '',
     (isset($data['saleprice']) && isset($data['saleassess'])) ? (int) $data['saleprice'] - (int) $data['saleassess'] : '',
     $data['sqft'],
     $data['bathrooms'],
@@ -220,8 +223,8 @@ foreach ($entries AS $id => $data) {
     $data['zoning'],
     $data['ward'],
     $data['census_block'],
-    (!empty($data['sqft']) && !empty($data['2020fullmarket'])) ? (int) $data['2020fullmarket'] / (int) $data['sqft'] : '',
-    (!empty($data['2016fullmarket']) && !empty($data['2020fullmarket'])) ? ((int) $data['2020fullmarket'] - (int) $data['2016fullmarket']) / (int) $data['2016fullmarket'] : '',
+    (!empty($data['sqft']) && !empty($data['2021fullmarket'])) ? (int) $data['2021fullmarket'] / (int) $data['sqft'] : '',
+    (!empty($data['2016fullmarket']) && !empty($data['2021fullmarket'])) ? ((int) $data['2021fullmarket'] - (int) $data['2016fullmarket']) / (int) $data['2016fullmarket'] : '',
     (!empty($data['saleprice'])) ? $data['saleprice'] / $data['sqft'] : '',
     $data['nbhd'],
     (empty($data['2020vacant']) ? 0 : 1),
