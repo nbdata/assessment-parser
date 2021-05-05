@@ -173,10 +173,10 @@ ksort($entries);
 $fp = fopen('output.csv', 'w');
 fputcsv($fp, array('ID', 'Street', 'Non-Homestead', 'Account', 'Code', '2016 City', '2016 Full', '2017 City', '2017 Full', '2018 City', '2018 Full', 
   '2019 City', '2019 Full', '2020 City', '2020 Full', '2021 City', '2021 Full', 'Sale Date', 'Sale Price', 'Sale AV', 
-  '2016OwnerAtAddress', '2017OwnerAtAddress', '2018OwnerAtAddress', '2019OwnerAtAddress', '2020OwnerAtAddress',
+  '2016OwnerAtAddress', '2017OwnerAtAddress', '2018OwnerAtAddress', '2019OwnerAtAddress', '2020OwnerAtAddress', '2021OwnerAtAddress',
   'Latitude', 'Longitude', 'TigerLine', '20162020Diff', 'SaleAssessDiff',
   'SqFt', 'Bathrooms', 'Bedrooms', 'YearBuilt', 'LandSize', 'Zoning', 'Ward', 'CensusBlock',
-  'AVPerSqFt', 'AVChangePercent', 'SalePricePerSqFt', 'NbhdCode', '2020Vacant', '2020Violations', 'OpportunityZone',
+  'AVPerSqFt', 'AVChangePercent', 'SalePricePerSqFt', 'NbhdCode', '2021Vacant', '2021Violations', 'OpportunityZone',
 ));
 foreach ($entries AS $id => $data) {
   if (empty($data['2020fullmarket'])) continue;
